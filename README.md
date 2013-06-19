@@ -1,4 +1,4 @@
 doppio-demo
 ===========
 
-Demo frontend 
+Demo frontend for the [Doppio JVM](https://github.com/int3/doppio).
