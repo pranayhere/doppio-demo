@@ -1,13 +1,12 @@
 
-# Warning: must have these installed via `npm install -g`
-COFFEE := coffee
-UGLIFY := uglifyjs
+COFFEE := $(shell npm bin)/coffee
+UGLIFY := $(shell npm bin)/uglifyjs
 
 SRC_JS := src/node_setup.js src/untar.js src/frontend.js
 
-.PHONY: all clean jcl
+.PHONY: all clean deps
 
-all: demo.js jcl mini-rt.tar listings.json
+all: deps demo.js mini-rt.tar listings.json
 
 demo.js: $(SRC_JS)
 	cat $(SRC_JS) | $(UGLIFY) -o $@
@@ -24,7 +23,8 @@ mini-rt.tar: tools/preload
 clean:
 	@rm -f $(SRC_JS) demo.js listings.json mini-rt.tar
 
-jcl: vendor/classes/java/util/zip/DeflaterEngine.class
+deps: vendor/classes/java/util/zip/DeflaterEngine.class
+	@npm install
 
 vendor/classes/java/util/zip/DeflaterEngine.class:
 	@bash tools/setup.sh

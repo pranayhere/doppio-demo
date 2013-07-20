@@ -1,0 +1,9 @@
+{
+  "name": "doppio-demo",
+  "dependencies": {
+    "coffee-script": "1.6.2",
+    "uglify-js": "2",
+    "optimist": "~0.3.5",
+    "express": "3.x"
+  }
+}
