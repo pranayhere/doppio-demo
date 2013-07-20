@@ -6,3 +6,4 @@ tools/preload
 vendor/jars
 vendor/java_home
 node_modules
+*.class
