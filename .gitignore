@@ -1,2 +1,7 @@
-
 demo.js
+mini-rt.tar
+listings.json
+src/*.js
+tools/preload
+vendor/jars
+vendor/java_home
