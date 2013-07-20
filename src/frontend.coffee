@@ -13,7 +13,7 @@ bs_cl = null
 sys_path = '/sys'
 
 preload = ->
-  node.fs.readFile "#{sys_path}/browser/mini-rt.tar", (err, data) ->
+  node.fs.readFile "#{sys_path}/mini-rt.tar", (err, data) ->
     if err
       console.error "Error downloading mini-rt.tar: #{err}"
       return
