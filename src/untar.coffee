@@ -2,6 +2,17 @@
 
 root = this
 
+# modern browsers slow the event loop when tab is not in focus,
+# so don't give up control! but guard against stack overflows, too.
+nonAsyncCount = 0
+root.asyncExecute = (fn) ->
+  if (document? and (document.hidden or document.mozHidden or
+      document.webkitHidden or document.msHidden) and
+      nonAsyncCount++ < 10000)
+    fn()
+  else
+    nonAsyncCount = 0
+    setImmediate fn
 
 root.untar = (bytes, cb, done_cb) ->
   next_file = ->
@@ -9,10 +20,10 @@ root.untar = (bytes, cb, done_cb) ->
     percent = bytes.pos() / bytes.size()
     cb percent, path, body
     if bytes.peek() != 0
-      asyncExecute next_file
+      root.asyncExecute next_file
     else
       done_cb?()
-  asyncExecute next_file
+  root.asyncExecute next_file
 
 shift_file = (bytes) ->
   header = bytes.read(512)
@@ -32,15 +43,3 @@ octal2num = (bytes) ->
     digit = parseInt String.fromCharCode b
     num += digit * Math.pow 8, (msd - idx)
   num
-
-# modern browsers slow the event loop when tab is not in focus,
-# so don't give up control! but guard against stack overflows, too.
-nonAsyncCount = 0
-asyncExecute = (fn) ->
-  if (document? and (document.hidden or document.mozHidden or
-      document.webkitHidden or document.msHidden) and
-      nonAsyncCount++ < 10000)
-    fn()
-  else
-    nonAsyncCount = 0
-    setImmediate fn
