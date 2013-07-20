@@ -5,23 +5,7 @@ set -e
 INSTALL_ECJ=true
 INSTALL_BEANSHELL=false
 
-cd `dirname $0`/..
-
-PLATFORM=`uname -s`
-PKGMGR=""
-
-if [ "$PLATFORM" = "Darwin" ]; then
-    if command -v brew; then
-        echo "Found the homebrew package manager."
-        PKGMGR="brew install"
-    fi
-fi
-
-if ! command -v wget >/dev/null && [ -n "$PKGMGR" ]; then
-    $PKGMGR wget
-fi
-
-cd vendor
+cd `dirname $0`/../vendor
 
 # check for the JCL
 # Ubuntu (security) repo actual on 24.02.2013
@@ -33,7 +17,7 @@ if [ ! -f classes/java/lang/Object.class ]; then
           "openjdk-6-jdk_6b27-1.12.5-0ubuntu0.12.04.1_i386.deb"
           "openjdk-6-jre-lib_6b27-1.12.5-0ubuntu0.12.04.1_all.deb")
     for DEB in ${DEBS[@]}; do
-      wget $DEBS_DOMAIN/$DEB
+      curl -O $DEBS_DOMAIN/$DEB
       ar p $DEB data.tar.gz | tar zx
     done
   cd ..
@@ -62,8 +46,8 @@ fi
 if [ ! -f classes/java/util/zip/DeflaterEngine.class ]; then
   echo "patching the class library with Jazzlib"
   mkdir -p jazzlib && cd jazzlib
-  wget -q "http://downloads.sourceforge.net/project/jazzlib/jazzlib/0.07/jazzlib-binary-0.07-juz.zip"
-  unzip -qq "jazzlib-binary-0.07-juz.zip"
+  curl -L "http://downloads.sourceforge.net/project/jazzlib/jazzlib/0.07/jazzlib-binary-0.07-juz.zip" -o jazzlib.zip
+  unzip -qq jazzlib.zip
 
   cp java/util/zip/*.class ../classes/java/util/zip/
   cd .. && rm -rf jazzlib
@@ -76,14 +60,17 @@ fi
 #   java -classpath vendor/classes org.eclipse.jdt.internal.compiler.batch.Main A.java
 # With Doppio: (see issue #218)
 #   ./doppio -Djdt.compiler.useSingleThread -jar vendor/jars/ecj.jar -1.6 classes/demo/Fib.java
-if [ $INSTALL_ECJ && ! -f jars/ecj.jar ]; then
+if [[ $INSTALL_ECJ && ! -f jars/ecj.jar ]]; then
   ECJ_JAR_URL="http://www.eclipse.org/downloads/download.php?file=/eclipse/downloads/drops/R-3.7.1-201109091335/ecj-3.7.1.jar"
   mkdir -p jars
-  wget -O jars/ecj.jar $ECJ_JAR_URL
+  curl -L $ECJ_JAR_URL -o jars/ecj.jar
   unzip -qq -o -d classes/ jars/ecj.jar
 fi
 
-cd ..  # back to start
-
-echo "Your environment should now be set up correctly."
-echo "Run './tools/webrick.rb' start the demo server."
+# Beanshell
+if [[ $INSTALL_BEANSHELL && ! -f jars/bsh2.jar ]]; then
+  BSH2_JAR_URL="http://beanshell2.googlecode.com/files/bsh-2.1b5.jar"
+  mkdir -p jars
+  curl -L $BSH2_JAR_URL -o jars/bsh2.jar
+  unzip -qq -o -d classes/ jars/bsh2.jar
+fi
